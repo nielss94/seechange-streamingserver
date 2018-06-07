@@ -1,21 +1,27 @@
 const express = require('express');
 const app = express();
 
-const SHA256 = require("crypto-js/sha256");
+const SHA256 = require('crypto-js/sha256');
+const AES = require('crypto-js/aes');
+const UTF8 = require('crypto-js/enc-utf8');
 
-const originalData = "Hallo Rick";
-const originalHash = SHA256(originalData).toString();
+// Symmetric key
+const key = '123';
 
-const receivedData = "Hallo Riack";
-const recreatedHash = SHA256(receivedData).toString();
+// Data received from Android App
+const data = "Hallo Rick";
+const hash = SHA256(data).toString();
+const cipherHash = AES.encrypt(hash, key);
 
-console.log(originalHash);
-console.log(recreatedHash);
+const plainHash = AES.decrypt(cipherHash, key).toString(UTF8);
 
-if (originalHash === recreatedHash) {
-    console.log('Hash verified');
+console.log(hash);
+console.log(plainHash);
+
+if (hash === plainHash) {
+    console.log('Integrity confirmed!');
 } else {
-    console.log('Hash not verified. WHO IS RESPONSIBLE FOR THIS?!?!');
+    console.log('NO INTEGRITY. WHO IS RESPONSIBLE FOR THIS?!?!');
 }
 
 module.exports = app;
