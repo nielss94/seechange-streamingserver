@@ -6,10 +6,14 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "assert": "^1.4.1",
     "cookie-parser": "~1.4.3",
     "crypto-js": "^3.1.9-1",
     "debug": "~2.6.9",
     "express": "~4.16.0",
     "morgan": "~1.9.0"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0"
   }
 }
