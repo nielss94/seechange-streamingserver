@@ -20,14 +20,27 @@ const originalHash = SHA256(originalData).toString();
 // msg 2
 const receivedData = "Hallo Rick";
 const recreatedHash = SHA256(receivedData).toString();
+const SHA256 = require('crypto-js/sha256');
+const AES = require('crypto-js/aes');
+const UTF8 = require('crypto-js/enc-utf8');
 
-console.log(originalHash);
-console.log(recreatedHash);
+// Symmetric key
+const key = '123';
 
-if (originalHash === recreatedHash) {
-    console.log('Hash verified');
+// Data received from Android App
+const data = "Hallo Rick";
+const hash = SHA256(data).toString();
+const cipherHash = AES.encrypt(hash, key);
+
+const plainHash = AES.decrypt(cipherHash, key).toString(UTF8);
+
+console.log(hash);
+console.log(plainHash);
+
+if (hash === plainHash) {
+    console.log('Integrity confirmed!');
 } else {
-    console.log('Hash not verified. WHO IS RESPONSIBLE FOR THIS?!?!');
+    console.log('NO INTEGRITY. WHO IS RESPONSIBLE FOR THIS?!?!');
 }
 
 module.exports = app;
