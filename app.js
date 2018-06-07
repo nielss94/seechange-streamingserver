@@ -1,7 +1,8 @@
 const express = require('express');
 const app = express();
-
 const SHA256 = require('crypto-js/sha256');
+const crypto = require('crypto');
+const cryption = require('./crypto/cryptography');
 const AES = require('crypto-js/aes');
 const UTF8 = require('crypto-js/enc-utf8');
 
