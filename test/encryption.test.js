@@ -35,8 +35,11 @@ describe("Adding integrity to data", () => {
 
         const hash = SHA256(data).toString();
         const cipherHash = AES.encrypt(hash.toString(), key);
-        const plainHash = AES.decrypt(cipherHash, fakeKey).toString(UTF8);
 
-        assert.notEqual(hash, plainHash);
+        // Makes a decryption with the correct key and decryption with incorrect key
+        const correctHash = AES.decrypt(cipherHash, key).toString(UTF8);
+        const incorrectHash = AES.decrypt(cipherHash, fakeKey).toString(UTF8);
+
+        assert.notEqual(correctHash, incorrectHash);
     });
 });
