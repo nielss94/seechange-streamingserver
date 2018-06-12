@@ -21,4 +21,14 @@ const integrityConfirmed = key.verify(data, digitalSignature);
 console.log(digitalSignature);
 console.log(integrityConfirmed);
 
+
+const RSA = require('node-rsa');
+
+
+const data = "Hallo Rick";
+const key = new RSA({ b: 512 });
+
+const digitalSignature = key.sign(data);
+const integrityConfirmed = key.verify(data, digitalSignature);
+
 module.exports = app;

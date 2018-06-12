@@ -9,12 +9,19 @@
   "dependencies": {
     "assert": "^1.4.1",
     "cookie-parser": "~1.4.3",
+    "crypto": "^1.0.1",
     "crypto-js": "^3.1.9-1",
     "debug": "~2.6.9",
     "express": "~4.16.0",
     "morgan": "~1.9.0",
+<<<<<<< HEAD
     "node-media-server": "^1.3.5",
     "node-rsa": "^1.0.0"
+=======
+    "node-media-server": "^1.3.4",
+    "node-rsa": "^1.0.0",
+    "rtmp-server": "^0.2.0"
+>>>>>>> becb1e94d8ac72e44d1493d53d51987124dfb544
   },
   "devDependencies": {
     "mocha": "^5.2.0"
