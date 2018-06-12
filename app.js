@@ -1,13 +1,9 @@
 const express = require('express');
 const app = express();
-
-const fs = require('fs');
 const RSA = require('node-rsa');
 
-fs.readFileSync('./certificates/server.key');
-fs.readFileSync('./certificates/server.crt');
-fs.readFileSync('./certificates/exampleCA.crt');
-
+const cryption = require('./crypto/cryptography');
+const keys = require('./crypto/cryptokeys');
 
 const data = "Hallo Rick";
 const keyData = "-----BEGIN PUBLIC KEY-----" +
@@ -19,6 +15,14 @@ const keyData = "-----BEGIN PUBLIC KEY-----" +
     "IHieharBiUF8sZ3GiESji5XTntbii73QthwhIVPatiJ9uJFqhUBe8mroGJaQfafX" +
     "rwIDAQAB" +
     "-----END PUBLIC KEY-----";
+
+const privatekey = new RSA(keys.privateKey);
+console.log(key);
+console.log(privatekey);
+
+fs.readFileSync('./certificates/server.key');
+fs.readFileSync('./certificates/server.crt');
+fs.readFileSync('./certificates/exampleCA.crt');
 
 console.log(keyData);
 
