@@ -1,9 +1,8 @@
-const Store = require(data-store);
+const fs = require('fs');
 
 function storeKey(key) {
-    const store = new Store({ path: keys.json});
-    store.set('PublicKey', key);
-    console.log(store.data);
+    const keyString = JSON.stringify(key);
+    fs.appendFile('./keyfile')
 }
 
 function verifyData() {
