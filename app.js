@@ -1,28 +1,14 @@
 const express = require('express');
 const app = express();
-const SHA256 = require('crypto-js/sha256');
-const crypto = require('crypto');
-const cryption = require('./crypto/cryptography');
-const AES = require('crypto-js/aes');
-const UTF8 = require('crypto-js/enc-utf8');
 
-// Symmetric key
-const key = '123';
+const RSA = require('node-rsa');
 
-// Data received from Android App
+
 const data = "Hallo Rick";
-const hash = SHA256(data).toString();
-const cipherHash = AES.encrypt(hash, key);
+const key = new RSA({ b: 512 });
 
-const plainHash = AES.decrypt(cipherHash, key).toString(UTF8);
-
-console.log(hash);
-console.log(plainHash);
-
-if (hash === plainHash) {
-    console.log('Integrity confirmed!');
-} else {
-    console.log('NO INTEGRITY. WHO IS RESPONSIBLE FOR THIS?!?!');
-}
+const digitalSignature = key.sign(data);
+const integrityConfirmed = key.verify(data, digitalSignature);
+// console.log(integrityConfirmed);
 
 module.exports = app;
