@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a63bdf20-c017-4136-8dff-dae007341686" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/certificates/exampleCA.crt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/certificates/server.crt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/certificates/server.key" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
@@ -22,8 +25,17 @@
       <file leaf-file-name="app.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
-              <caret line="7" column="32" lean-forward="true" selection-start-line="7" selection-start-column="32" selection-end-line="7" selection-end-column="32" />
+            <state relative-caret-position="425">
+              <caret line="25" column="48" selection-start-line="25" selection-start-column="48" selection-end-line="25" selection-end-column="48" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cryptokeys.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/crypto/cryptokeys.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="248">
+              <caret line="31" column="18" selection-start-line="31" selection-start-column="18" selection-end-line="39" selection-end-column="26" />
             </state>
           </provider>
         </entry>
@@ -35,6 +47,8 @@
       <find>recrea</find>
       <find>https://video-edge-c559ac.ams02.hls.ttvnw.net/v1/segment/CuEDjm_zanwBCcGixSNCGOeDxkhkqunZdGHcuRIrKH-eqGS1xOd4t2JIFqGfOk85tTpUDOMfv0MvAdsHAKkU6PKf7-aM0YL0DYvgS5lYW5wvwgxzKMibv_itJ3B5vykX_kO9PyJ9g9FlMonoN2lZAN3_L7n3c--QnP8QVsQUePsnF8GeTJ1Ps-J5N5xj2s3IOy4kcBBFmZbkaB7ItkbmLR2c8kADaSXiBI1-dRIr-hsSwvBn7MVcw4C-IR7E6ynHne8AQfVsabqVqIgiTXtJSWttsW5OP1Som4cKaEasWmeXIZh15Bpl1wQegpx7HB4fLpLE3ZsdkxCU1NRj6p6_dOPX8W3onDg4NNId0FVI3SpXf9ym3JEph8CkuNCgJVrcwcsDebd88JyMNZm6E4EXmWTeyRLWeCyJUGe1s9T_KKkhmlE9MNxyTMUw_ExXPqT-vAon-ztRqh6ooFUiAExbmeS8MRyxIa6LfRe9iNoncmF72T5P_g1dRNB48sK1WDyLH69xLpSfX4dYjMJOuQhcG1tvMTLZGoz6-RBj6ptZLBpHcRFAgBB94sVycC1NBI3d8IvDReL-pRGazdTQKFg7Qx2Vj-_DyoYmhQZnYOc8DhEHqMeBQ7-I1nmh8-f4XnIzhIEE_RIQdDksVYfQxRiyzSSyNxp3rRoM3qeICJ4xP3w3NOin.ts</find>
       <find>https://video-edge-c559ac.ams02.hls.ttvnw.net/v1/segment/CuEDry8oLFQPfzkOvsWj99yTLhvuutGMb5tiz9MxUfnEh9hrbI9FgatDsb33jcI5o3cuXGQqqsZTvw8CtIKM0gHUwB0MUoM4Hq9NbhPb76UoGfQpaRPJVJ4Rz6Tq-IGsoXG5OkAOZ3YQ-7bbNXqVmsFODvhRPdC4pwztnDsk5t6QXIRB7WHxKyZJ280vQx-jgV7tqCOTgyCC-jFvXlwHOAKWmaAIO3YF5fbTXDP0GgpCRgsPP_iXGGv705P2C5Pq04aUE3-hASuTT6BdJnCSZ-3FVkvRw--FBAPrkpANhQt3S5Hrle0LkUmujhnNwWQOfwJBvXfzIyT9jaE9D2SK-5Ar_jdU8n8jLp8WM6QKsTzHjlwEijiYI0jCVPnyC4O9r2XK0AAs2D5vwvmMqMYhs5CNQ4uyaGA4LEvOhxzdhYUBNKJWev7nNDUw8TVCj3-mETEI_CGrYhMxQO_HlhqwLg7zrV11b4TFxz_7GV6kqfOLVSL47IGBSoAfg_eAtoTM-5NjCOLVwGIOLRzGKRnBMkvTAj6xSqi8_Vn3qlgSuAPCiwbdyHC-LlVeQURPygK-vKEw2NRAHwavzF6jVtPB2JtymORtlLwt5RuB5vsQWGckI9c6P5eb75NdZ_n2IoIzyh4o0RIQ6tiK2-lYtJQxuk7IjfwrgBoM1pZX_BMdJt3NlVqa.ts</find>
+      <find>req</find>
+      <find>cn</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -93,7 +107,7 @@
             <path>
               <item name="TheCircleIntegrityTest" type="b2602c69:ProjectViewProjectNode" />
               <item name="TheCircleIntegrityTest" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="crypto" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -104,12 +118,17 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="8.11.1" />
-    <property name="last_opened_file_path" value="$USER_HOME$/Documents" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs.mocha.mocha_node_package_dir" value="$PROJECT_DIR$/node_modules/mocha" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Felix\Informatica\Jaar2\Periode 4\Project\SeeChange-Streaming-Server\TheCircleIntegrityTest\certificates" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -138,18 +157,17 @@
       <workItem from="1528452537109" duration="9446000" />
       <workItem from="1528710053685" duration="6644000" />
       <workItem from="1528719395432" duration="2967000" />
-      <workItem from="1528788502580" duration="2780000" />
+      <workItem from="1528788502580" duration="7632000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="36566000" />
+    <option name="totallyTimeSpent" value="41418000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10729167" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13333334" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
@@ -157,7 +175,7 @@
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info id="npm" order="2" side_tool="true" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="7" visible="true" weight="0.35706696" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="7" visible="true" weight="0.32412326" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -293,10 +311,31 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/crypto/cryptoconfig.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="26" lean-forward="true" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crypto/cryptography.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="340">
+          <caret line="20" column="30" lean-forward="true" selection-start-line="20" selection-start-column="30" selection-end-line="20" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crypto/cryptokeys.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="248">
+          <caret line="31" column="18" selection-start-line="31" selection-start-column="18" selection-end-line="39" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" column="32" lean-forward="true" selection-start-line="7" selection-start-column="32" selection-end-line="7" selection-end-column="32" />
+        <state relative-caret-position="425">
+          <caret line="25" column="48" selection-start-line="25" selection-start-column="48" selection-end-line="25" selection-end-column="48" />
         </state>
       </provider>
     </entry>
