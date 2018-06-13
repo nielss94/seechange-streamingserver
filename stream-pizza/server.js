@@ -47,18 +47,38 @@ nms.on('preConnect', (id, args) => {
       console.log(`==========SESSION HEADER INFO============`);
       session.inPackets.forEach((element, i) => {
         let timestamp = element.header.timestamp;
-
+        
         if(timestamp != previousTimestamp && i == 6){
-          console.log(`${i} ${timestamp}`);
+          console.log(`${timestamp} on RTMP`);
           previousTimestamp = timestamp;
-          
+          matchTimestamp(timestamp);
         }
       });
     }catch(e) {
       console.log(e);
     }
-  },20);
+  },10);
 });
+
+async function matchTimestamp(timestamp) {
+  let matchObj;
+  await setTimeout(() => {
+    packetStore.forEach(element => {
+      if(element.absoluteMadTime === timestamp){
+        matchObj = {
+          packetStamp: element.absoluteMadTime,
+          rtmpStamp: timestamp
+        }
+      }
+    });
+    if(matchObj){
+      console.log(`${timestamp} MATCHED with a received packet`);
+      console.log(matchObj);
+    }else{
+      console.log(`${timestamp} DID NOT MATCH with a received packet`);
+    }
+  },10)
+}
  
 nms.on('postConnect', (id, args) => {
   console.log('[NodeEvent on postConnect]', `id=${id} args=${JSON.stringify(args)}`);
@@ -102,9 +122,12 @@ function addPacket(packet) {
 
 io.on('connection', socket => {  
   socket.on('packet', packet => {
+    p = JSON.parse(packet);
     console.log(`==========PACKET============`);
-    addPacket(packet);
-    console.log(JSON.parse(packet));
+    console.log(p.absoluteMadTime);
+    console.log(p);
+    
+    addPacket(p);
   });
 
   socket.on('disconnect', () => {
