@@ -14,32 +14,48 @@ const config = {
   },
   http: {
     port: 8000,
+    mediaroot: './media',
     allow_origin: '*'
+  },
+  trans: {
+    ffmpeg: '/usr/bin/ffmpeg',
+    tasks: [
+      {
+        app: 'live',
+        ac: 'aac',
+        hls: true,
+        hlsFlags: '[hls_time=2:hls_list_size=3:hls_flags=delete_segments]',
+        dash: true,
+        dashFlags: '[f=dash:window_size=3:extra_window_size=5]'
+      }
+    ]
   }
 };
  
 var nms = new NodeMediaServer(config)
 nms.run();
 
+let previousTimestamp;
+let packetStore = [];
 
 nms.on('preConnect', (id, args) => {
   console.log('[NodeEvent on preConnect]', `id=${id} args=${JSON.stringify(args)}`);
-  //let session = nms.getSession(id);
-  // session.reject();
   
   setInterval(() => {
     try{
       let session = nms.getSession(id);
       console.log(`==========SESSION HEADER INFO============`);
-      //console.log(session.parserPacket.payload);
-      console.log(session);
-      session.inPackets.forEach(element => {
-        console.log(element.header);
-      });
+      session.inPackets.forEach((element, i) => {
+        let timestamp = element.header.timestamp;
 
+        if(timestamp != previousTimestamp && i == 6){
+          console.log(`${i} ${timestamp}`);
+          previousTimestamp = timestamp;
+          
+        }
+      });
     }catch(e) {
       console.log(e);
-      
     }
   },20);
 });
@@ -80,34 +96,22 @@ nms.on('donePlay', (id, StreamPath, args) => {
   console.log('[NodeEvent on donePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
 });
 
+function addPacket(packet) {
+  packetStore.push(packet);
+}
 
-io.on('connection', socket => {
-  socket.on('packetpack', data => {
-    //console.log(`==========PACKETPACK1============`);
-    //console.log(data);
-  });
-  
-  socket.on('packet', data => {
+io.on('connection', socket => {  
+  socket.on('packet', packet => {
     console.log(`==========PACKET============`);
-    console.log(data);
-  });
-
-  socket.on('packetpack2', data => {
-    //console.log(`==========PACKETPACK2============`);
-    //console.log(data);
-  });
-
-  socket.on('publickey', key => {
-    console.log(`==========PUBLIC KEY============`);
-    console.log(key);
+    addPacket(packet);
+    console.log(JSON.parse(packet));
   });
 
   socket.on('disconnect', () => {
       console.log(`${socket.id} disconnected`);
-  })
+  });
 });
 
 server.listen(3000, () => {
   console.log(`listening on port 3000`);    
 });
-
