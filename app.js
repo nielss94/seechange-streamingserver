@@ -2,11 +2,8 @@ const express = require('express');
 const app = express();
 const RSA = require('node-rsa');
 
-const cryption = require('./crypto/cryptography');
-const keys = require('./crypto/cryptokeys');
-
-const data = "Hallo Rick";
-const keyData = "-----BEGIN PUBLIC KEY-----" +
+const message = "DIT WORDT GEENCRYPT";
+const key = "-----BEGIN PUBLIC KEY-----" +
     "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzul1PJDDi/wdZVPbFQwe" +
     "rqOqgP/oQW6d+5DTDcb37x/3/+u1GEPRhnWnUZM+LZ9i8DVqjrlmMTUgAO71B4PC" +
     "gRpQBDk6KWWeQXIyxW3VwzSyNNjCZPrvn4/0IIY4eNgKX9HhiaIBhaGLqV1DSH0W" +
@@ -16,22 +13,13 @@ const keyData = "-----BEGIN PUBLIC KEY-----" +
     "rwIDAQAB" +
     "-----END PUBLIC KEY-----";
 
-const privatekey = new RSA(keys.privateKey);
-console.log(key);
-console.log(privatekey);
+const emptyKey = new RSA({b: 512});
+emptyKey.importKey(key, 'public');
+console.log(emptyKey);
 
-fs.readFileSync('./certificates/server.key');
-fs.readFileSync('./certificates/server.crt');
-fs.readFileSync('./certificates/exampleCA.crt');
-
-console.log(keyData);
-
-const key = new RSA();
-const pubKey = key.importKey(keyData, 'pkcsx1');
-console.log(pubKey);
-
-const digitalSignature = key.sign(data);
-const integrityConfirmed = key.verify(data, digitalSignature);
-console.log(integrityConfirmed);
+const encryption = emptyKey.encrypt(message, 'base64');
+console.log(encryption);
+const decryption = emptyKey.decryptPublic(encryption, 'utf8');
+console.log(decryption);
 
 module.exports = app;
