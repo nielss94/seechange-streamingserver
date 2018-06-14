@@ -51,6 +51,8 @@ nms.on('preConnect', (id, args) => {
         if(timestamp != previousTimestamp && i == 6){
           console.log(`==========SESSION HEADER INFO============`);
           console.log(`${timestamp} on RTMP`);
+          console.log(session.parserPacket.payload);
+          
           previousTimestamp = timestamp;
          // matchTimestamp(timestamp);
         }
@@ -123,8 +125,6 @@ function addPacket(packet) {
 
 io.on('connection', socket => {  
 
-  pkey;
-
   socket.on('packet', packet => {
     //p = JSON.parse(packet);
     console.log(`==========PACKET============`);
@@ -134,9 +134,6 @@ io.on('connection', socket => {
     //addPacket(p);
   });
 
-  socket.on('publickey', key => {
-    pkey = new NodeRSA(key);
-  });
 
   socket.on('disconnect', () => {
       console.log(`${socket.id} disconnected`);
