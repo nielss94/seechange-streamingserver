@@ -1,5 +1,5 @@
-function verifyPayload(digitalsignature, buffer) {
-    return true;
+function verifyPayload(buffer, digitalsignature) {
+    
 }
 
 module.exports = {verifyPayload}
