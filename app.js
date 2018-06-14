@@ -1,3 +1,6 @@
+const verify = require('./verifyData');
+
+
 const payload =
 { 
     "hash": "9fc6d5abda83152d7409acafc5b0d26249e82c272e9af214002d7edb9e766cdc",
