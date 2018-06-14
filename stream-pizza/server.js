@@ -1,6 +1,6 @@
 const server = require('http').createServer();
 const io = require('socket.io').listen(server);
-
+const NodeRSA = require('node-rsa');
 const NodeMediaServer = require('node-media-server');
  
 const config = {
@@ -44,14 +44,15 @@ nms.on('preConnect', (id, args) => {
   setInterval(() => {
     try{
       let session = nms.getSession(id);
-      console.log(`==========SESSION HEADER INFO============`);
+      
       session.inPackets.forEach((element, i) => {
         let timestamp = element.header.timestamp;
         
         if(timestamp != previousTimestamp && i == 6){
+          console.log(`==========SESSION HEADER INFO============`);
           console.log(`${timestamp} on RTMP`);
           previousTimestamp = timestamp;
-          matchTimestamp(timestamp);
+         // matchTimestamp(timestamp);
         }
       });
     }catch(e) {
@@ -121,13 +122,20 @@ function addPacket(packet) {
 }
 
 io.on('connection', socket => {  
+
+  pkey;
+
   socket.on('packet', packet => {
-    p = JSON.parse(packet);
+    //p = JSON.parse(packet);
     console.log(`==========PACKET============`);
-    console.log(p.absoluteMadTime);
-    console.log(p);
-    
-    addPacket(p);
+    //console.log(p.absoluteMadTime);
+    console.log(packet);
+  
+    //addPacket(p);
+  });
+
+  socket.on('publickey', key => {
+    pkey = new NodeRSA(key);
   });
 
   socket.on('disconnect', () => {
