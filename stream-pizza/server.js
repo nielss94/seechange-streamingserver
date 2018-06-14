@@ -125,13 +125,24 @@ function addPacket(packet) {
 
 io.on('connection', socket => {  
 
+  pkey = '';
+
   socket.on('packet', packet => {
     //p = JSON.parse(packet);
     console.log(`==========PACKET============`);
     //console.log(p.absoluteMadTime);
     console.log(packet);
-  
+    buffer = Buffer.from(packet, "hex");
+    console.log(buffer);
+
+    
     //addPacket(p);
+  });
+
+  socket.on('publickey', key => {
+    console.log(`==========PUBLIC KEY============`);
+    pkey = key;
+    console.log(pkey);
   });
 
 
