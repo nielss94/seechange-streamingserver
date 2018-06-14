@@ -1,6 +1,6 @@
 const server = require('http').createServer();
 const io = require('socket.io').listen(server);
-const NodeRSA = require('node-rsa');
+const RSA = require('node-rsa');
 const NodeMediaServer = require('node-media-server');
  
 const config = {
@@ -125,7 +125,7 @@ function addPacket(packet) {
 
 io.on('connection', socket => {  
 
-  pkey = '';
+  keyData = '';
 
   socket.on('packet', packet => {
     //p = JSON.parse(packet);
@@ -134,15 +134,24 @@ io.on('connection', socket => {
     console.log(packet);
     buffer = Buffer.from(packet, "hex");
     console.log(buffer);
-
+    if(keyData != ''){
+      let key = new RSA();
+      let pubKey = key.importKey(keyData, 'pkcsx1');
+      console.log(pubKey);
+      decryptedData = key.decryptPublic(buffer);
+      console.log(decryptedData);
+    }
     
     //addPacket(p);
   });
 
   socket.on('publickey', key => {
     console.log(`==========PUBLIC KEY============`);
-    pkey = key;
-    console.log(pkey);
+    console.log(key);
+    
+    keyData = `-----BEGIN PUBLIC KEY-----${key}-----END PUBLIC KEY-----`;
+    console.log(keyData);
+    
   });
 
 
