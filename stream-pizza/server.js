@@ -1,52 +1,8 @@
 const server = require('http').createServer();
 const io = require('socket.io').listen(server);
-const RSA = require('node-rsa');
 const NodeMediaServer = require('node-media-server');
-
-keyData = `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu/TGs6MXXHCfCLfrP6Ku
-QSyjPO6RHajxEEKeLGSsNdJKQ8k1NW9qRa5QNMvNu/m3ezjtqIN9Evy+puHuzPGC
-X99R+OSbEFV2tLeaTwjpQCDTBGBWqby5HlxXuxU3lPo6VY07Z1uJiv50jClg1kCs
-cSLhh/fI8IYsdfCGlFKmNEiarMdHNdYscTgZ86gPnPEWAHQFBXT/XYNR8Wtzwk0W
-9Le+m2eFHuXFOxNG/Y6gwBze4gJxvFaq9BP4o8I1e4MD9Vcn+qA3T5iBRPtCEB5J
-GjfpQKHT/2sVl0z1YfBGi4okyfBf/tdZvqjR44yLv0hEtq2DDu75xbrjkmUR0fN0
-4QIDAQAB
------END PUBLIC KEY-----`;
-
-let key = new RSA(`-----BEGIN RSA PRIVATE KEY-----
-  MIIEowIBAAKCAQEAu/TGs6MXXHCfCLfrP6KuQSyjPO6RHajxEEKeLGSsNdJKQ8k1
-  NW9qRa5QNMvNu/m3ezjtqIN9Evy+puHuzPGCX99R+OSbEFV2tLeaTwjpQCDTBGBW
-  qby5HlxXuxU3lPo6VY07Z1uJiv50jClg1kCscSLhh/fI8IYsdfCGlFKmNEiarMdH
-  NdYscTgZ86gPnPEWAHQFBXT/XYNR8Wtzwk0W9Le+m2eFHuXFOxNG/Y6gwBze4gJx
-  vFaq9BP4o8I1e4MD9Vcn+qA3T5iBRPtCEB5JGjfpQKHT/2sVl0z1YfBGi4okyfBf
-  /tdZvqjR44yLv0hEtq2DDu75xbrjkmUR0fN04QIDAQABAoIBAA6T5pFqNdaimYMY
-  mLNfz7oYVzTToAe34bKMKC5zRHQMMlxdj7XsRUbQRUJDCFrq/FMfUDeAs0O0vKi+
-  30Gf/aen73ipamly53kOwHYez9B8e0Fco3wYuhbjvJ4zABOa8MlP4eqbS+iu4aU5
-  VFxpubYwqWNdUYVuMqaXGCkK2/8z/Ceh6Iv/F7tqEOEwwaTuoBWjb9y7Ew7mFIm8
-  YXG8VYcS6GOrJv3EUrnefxJ2a26g29uejn3KgWxZNJ5jFlvAdB9xcPGYe1cYhmTD
-  7wGjtmiYOT3jjfM6OJbxmZrLm+w4iZqCeScU1mD095en5cnaryLXOtG6FB7azS+k
-  UutqV60CgYEA9NpEFajDFWPNo9hhjv8hRkAz01yLVPepZ1d7kC/2WwEA3TpGz1F0
-  JZ5eFDxkspY8SOSCzk02eUcxbDP13spNBouWGIZOVbWNUjXVNdH9BHR/YnwGz3l2
-  qlAWg915qH9E3VkKBtICvGRT6s+igKsrpbBnm+H1d6Y8xlLSzUWxBS8CgYEAxINj
-  NBL1yrm4nIV2AQKGrqYJBS4UCEcSZxw7k7BEIvnjIIG8gMX5YUB67hxMO8Wja2ia
-  EuwhFv1ioDMsv4H6nfqFqWpGp0BNSXxSOn+RH8P1LEIfbsB4FGRdJUv+nUAsNOea
-  kU2RTiQFmiQBinYliT2nrTV9xZBP0+Vk6XPewu8CgYBmLL7EmwvtXRxvBtiPJ3/n
-  JNt7k97AsiiK60KwxJL1HtIRf0QVN1RUbmWr5BfRPkgh0tmS5T2aFk9Va8lqEtlZ
-  pd4YldMSiRRT/grezqXauhJ+MmtVIMaYA5uho0YlPhaql4FLn09s9iDel46kSsmH
-  9rkFn6EjMMejquQ0rKRWGQKBgCZzKrrqpssGsbd2aZNjAiUz+XnY/TRta41fOcz4
-  5SwOxsD6gX6UvemoayUhxky/q+z9J4BiUUslQuHjgXLrJLU6amKul6pr63Ngbtph
-  UWzss5D4Uxwhbp1W0d7VUrlD8CJd2qFpku++HpZ9SwvjeA61UJSUbcp1JRlpvefr
-  sv9jAoGBANFg8YdnaowlmXqCeT0sKspLsG6qg1wmB2SyUPGjFNUgn3VxY6ANk+ji
-  r5eFZev3E+A7X4ce+dYvEUhjJdpt3URXHLg9M2sdRK45BudiPo+8jK7B55xzk4yZ
-  idFTJbPFh61asYuL5NFoN9k5AV6/j9FS03RKFYflFryeQZVYjw1X
-  -----END RSA PRIVATE KEY-----`);
-    
-  // encryptedData = key.encryptPrivate('test', 'buffer', 'utf8');
-  // console.log(encryptedData);
-
-  // key.importKey(keyData, 'public');
-  // decryptedData = key.decryptPublic(encryptedData);
-  // console.log(decryptedData.toString('utf8'));
+const ursa = require('ursa');
+const fs = require('fs');
 
 const config = {
   logType: 3,
@@ -170,42 +126,42 @@ function addPacket(packet) {
 
 io.on('connection', socket => {  
 
- // keyData = `-----BEGIN PUBLIC KEY-----
- // MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCqGKukO1De7zhZj6+H0qtjTkVxwTCpvKe4eCZ0
- // FPqri0cb2JZfXJ/DgYSF6vUpwmJG8wVQZKjeGcjDOL5UlsuusFncCzWBQ7RKNUSesmQRMSGkVb1/
- // 3j+skZ6UtW+5u09lHNsj6tQ51s1SPrCBkedbNf0Tp0GbMJDyR4e9T04ZZwIDAQAB
- // -----END PUBLIC KEY-----`;
+  keyData = '';
+  pkey = null;
 
- socket.on('packet', packet => {
-   //p = JSON.parse(packet);
-   console.log(`==========PACKET============`);
-   //console.log(p.absoluteMadTime);
-   console.log(packet);
-   buffer = Buffer.from(packet, "hex");
-   console.log(buffer);
-   if(keyData != ''){
-    //  let key = new RSA({b: 1024});
+  socket.on('packet', packet => {
+    console.log(`==========PACKET============`);
+    console.log(packet);
 
-    //  key.importKey(keyData, 'public');
-    //  decryptedData = key.decryptPublic(buffer);
-    //  console.log(decryptedData);
-   }
-   //addPacket(p);
- });
+    if(!pkey) {
+      console.log(Buffer.from(keyData));
+      pkey = ursa.createPublicKey(Buffer.from(keyData),'utf8');
+      
+      console.log(`======PUBLIC KEY BY URSA========`);
+      console.log(pkey);
+    } 
+    
+    let decryptedData = pkey.publicDecrypt(packet, 'hex', 'utf8');
 
- socket.on('publickey', key => {
-   console.log(`==========PUBLIC KEY============`);
-   console.log(key);
+    const p = JSON.parse(decryptedData);
+
+    console.log(`======DECRYPTED DATA========`);
+    console.log(p);
+    //addPacket(p);
+  });
+
+  socket.on('publickey', key => {
+    console.log(`==========PUBLIC KEY============`);
+    console.log(key);
+    keyData = `-----BEGIN PUBLIC KEY-----\n${key}-----END PUBLIC KEY-----\n`;
+    console.log(keyData);
    
-   //keyData = `-----BEGIN PUBLIC KEY-----${key}-----END PUBLIC KEY-----`;
-   //console.log(keyData);
-   
- });
+  });
 
 
- socket.on('disconnect', () => {
-     console.log(`${socket.id} disconnected`);
- });
+  socket.on('disconnect', () => {
+    console.log(`${socket.id} disconnected`);
+  });
 });
 
 server.listen(3000, () => {
