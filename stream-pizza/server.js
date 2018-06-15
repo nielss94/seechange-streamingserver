@@ -1,13 +1,9 @@
 const server = require('http').createServer();
 const io = require('socket.io').listen(server);
 const NodeMediaServer = require('node-media-server');
-<<<<<<< HEAD
 const ursa = require('ursa');
 const fs = require('fs');
 
-=======
-  
->>>>>>> b5c89d9b4f3e3aafdf64b238368fc781277e19b3
 const config = {
   logType: 3,
   rtmp: {
