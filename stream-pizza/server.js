@@ -2,7 +2,7 @@ const server = require('http').createServer();
 const io = require('socket.io').listen(server);
 const RSA = require('node-rsa');
 const NodeMediaServer = require('node-media-server');
- 
+  
 const config = {
   logType: 3,
   rtmp: {
