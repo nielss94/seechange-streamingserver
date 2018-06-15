@@ -1,16 +1,20 @@
 const server = require('http').createServer();
 const io = require('socket.io').listen(server);
 const NodeMediaServer = require('node-media-server');
+<<<<<<< HEAD
 const ursa = require('ursa');
 const fs = require('fs');
 
+=======
+  
+>>>>>>> b5c89d9b4f3e3aafdf64b238368fc781277e19b3
 const config = {
   logType: 3,
   rtmp: {
-    port: 1935,
-    chunk_size: 10000,
-    gop_cache: false,
-    ping: 20,
+    port: 1999,
+    chunk_size: 60000,
+    gop_cache: true,
+    ping: 60,
     ping_timeout: 30
   },
   http: {
@@ -32,7 +36,7 @@ const config = {
     ]
   }
 };
-
+ 
 var nms = new NodeMediaServer(config)
 nms.run();
 
@@ -40,88 +44,88 @@ let previousTimestamp;
 let packetStore = [];
 
 nms.on('preConnect', (id, args) => {
- console.log('[NodeEvent on preConnect]', `id=${id} args=${JSON.stringify(args)}`);
- 
- setInterval(() => {
-   try{
-     let session = nms.getSession(id);
-     
-     session.inPackets.forEach((element, i) => {
-       let timestamp = element.header.timestamp;
-       
-       if(timestamp != previousTimestamp && i == 6){
-         console.log(`==========SESSION HEADER INFO============`);
-         console.log(`${timestamp} on RTMP`);
-         console.log(session.parserPacket.payload);
-         
-         previousTimestamp = timestamp;
-        // matchTimestamp(timestamp);
-       }
-     });
-   }catch(e) {
-     console.log(e);
-   }
- },10);
+  console.log('[NodeEvent on preConnect]', `id=${id} args=${JSON.stringify(args)}`);
+  
+  setInterval(() => {
+    try{
+      let session = nms.getSession(id);
+      
+      session.inPackets.forEach((element, i) => {
+        let timestamp = element.header.timestamp;
+        
+        if(timestamp != previousTimestamp && i == 6){
+          console.log(`==========SESSION HEADER INFO============`);
+          console.log(`${timestamp} on RTMP`);
+          console.log(session.parserPacket.payload);
+          
+          previousTimestamp = timestamp;
+         // matchTimestamp(timestamp);
+        }
+      });
+    }catch(e) {
+      console.log(e);
+    }
+  },10);
 });
 
 async function matchTimestamp(timestamp) {
- let matchObj;
- await setTimeout(() => {
-   packetStore.forEach(element => {
-     if(element.absoluteMadTime === timestamp){
-       matchObj = {
-         packetStamp: element.absoluteMadTime,
-         rtmpStamp: timestamp
-       }
-     }
-   });
-   if(matchObj){
-     console.log(`${timestamp} MATCHED with a received packet`);
-     console.log(matchObj);
-   }else{
-     console.log(`${timestamp} DID NOT MATCH with a received packet`);
-   }
- },10)
+  let matchObj;
+  await setTimeout(() => {
+    packetStore.forEach(element => {
+      if(element.absoluteMadTime === timestamp){
+        matchObj = {
+          packetStamp: element.absoluteMadTime,
+          rtmpStamp: timestamp
+        }
+      }
+    });
+    if(matchObj){
+      console.log(`${timestamp} MATCHED with a received packet`);
+      console.log(matchObj);
+    }else{
+      console.log(`${timestamp} DID NOT MATCH with a received packet`);
+    }
+  },10)
 }
  
 nms.on('postConnect', (id, args) => {
- console.log('[NodeEvent on postConnect]', `id=${id} args=${JSON.stringify(args)}`);
+  console.log('[NodeEvent on postConnect]', `id=${id} args=${JSON.stringify(args)}`);
 });
  
 nms.on('doneConnect', (id, args) => {
- console.log('[NodeEvent on doneConnect]', `id=${id} args=${JSON.stringify(args)}`);
+  console.log('[NodeEvent on doneConnect]', `id=${id} args=${JSON.stringify(args)}`);
 });
  
 nms.on('prePublish', (id, StreamPath, args) => {
- console.log('[NodeEvent on prePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
- // let session = nms.getSession(id);
- // session.reject();
+  console.log('[NodeEvent on prePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+  // let session = nms.getSession(id);
+  // session.reject();
 });
  
 nms.on('postPublish', (id, StreamPath, args) => {
- console.log('[NodeEvent on postPublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+  console.log('[NodeEvent on postPublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
 });
  
 nms.on('donePublish', (id, StreamPath, args) => {
- console.log('[NodeEvent on donePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+  console.log('[NodeEvent on donePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
 });
  
 nms.on('prePlay', (id, StreamPath, args) => {
- console.log('[NodeEvent on prePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
- // let session = nms.getSession(id);
- // session.reject();
+  console.log('[NodeEvent on prePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+  // let session = nms.getSession(id);
+  // session.reject();
 });
  
 nms.on('postPlay', (id, StreamPath, args) => {
- console.log('[NodeEvent on postPlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+  console.log('[NodeEvent on postPlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
 });
  
 nms.on('donePlay', (id, StreamPath, args) => {
- console.log('[NodeEvent on donePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+  console.log('[NodeEvent on donePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
 });
 
 function addPacket(packet) {
- packetStore.push(packet);
+  packetStore.push(packet);
 }
 
 io.on('connection', socket => {  
@@ -165,5 +169,5 @@ io.on('connection', socket => {
 });
 
 server.listen(3000, () => {
-  console.log(`listening on port 3000`);
+  console.log(`listening on port 3000`);    
 });
