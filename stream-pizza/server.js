@@ -3,6 +3,9 @@ const io = require('socket.io').listen(server);
 const NodeMediaServer = require('node-media-server');
 const ursa = require('ursa');
 const fs = require('fs');
+const path = require('path');
+const spawn = require('child-process-promise').spawn;
+const uuidV4 = require('uuid/v4');
 
 const config = {
   logType: 3,
@@ -17,24 +20,50 @@ const config = {
     port: 8000,
     mediaroot: './media',
     allow_origin: '*'
-  },
-  trans: {
-    ffmpeg: '/usr/bin/ffmpeg',
-    tasks: [
-      {
-        app: 'live',
-        ac: 'aac',
-        hls: true,
-        hlsFlags: '[hls_time=2:hls_list_size=3:hls_flags=delete_segments]',
-        dash: true,
-        dashFlags: '[f=dash:window_size=3:extra_window_size=5]'
-      }
-    ]
   }
 };
 
-var nms = new NodeMediaServer(config)
+var nms = new NodeMediaServer(config);
 nms.run();
+
+//processing video streams
+let streamMediaPath;
+
+function processVideo(path) {
+    let args = [
+        '-loglevel', 'error',
+        '-i', 'rtmp://188.166.127.54'+path,
+        '-x264opts', 'keyint=60:no-scenecut',
+        '-s', '480x640',
+        '-profile:v', 'main',
+        '-r', '30',
+        '-b:v', '1000k',
+        '-profile:v','main',
+        '-preset','veryfast',
+        '-c:a','copy',
+        '-strict','-2',
+        '-sws_flags','bilinear',
+        '-hls_list_size','6',
+        '-hls_time','2','/var/www/stream-pizza/media/'+path+'/index.m3u8'
+    ];
+
+    let ffmpeg = spawn('ffmpeg', args);
+    ffmpeg.then(function () {
+        console.log('[spawn] done!');
+    })
+    .catch(function (err) {
+        console.error('[spawn] ERROR: ', err);
+    });
+}
+
+//create directories
+const mkdirSync = function (dirPath) {
+    try {
+        fs.mkdirSync(dirPath)
+    } catch (err) {
+        if (err.code !== 'EEXIST') throw err
+    }
+};
 
 let previousTimestamp;
 let packetStore = [];
@@ -49,7 +78,7 @@ nms.on('preConnect', (id, args) => {
      session.inPackets.forEach((element, i) => {
        let timestamp = element.header.timestamp;
        
-       if(timestamp != previousTimestamp && i == 6){
+       if(timestamp !== previousTimestamp && i === 6){
          console.log(`==========SESSION HEADER INFO============`);
          console.log(`${timestamp} on RTMP`);
          console.log(session.parserPacket.payload);
@@ -100,10 +129,21 @@ nms.on('prePublish', (id, StreamPath, args) => {
  
 nms.on('postPublish', (id, StreamPath, args) => {
  console.log('[NodeEvent on postPublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+
+ streamMediaPath = config.http.mediaroot + StreamPath;
+ mkdirSync(path.resolve(streamMediaPath));
+ processVideo(StreamPath);
+
 });
  
 nms.on('donePublish', (id, StreamPath, args) => {
  console.log('[NodeEvent on donePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+
+ //archive folder
+ fs.rename(streamMediaPath, streamMediaPath + '-' + uuidV4(), function (err) {
+   if (err) throw err;
+   console.log('renamed complete');
+ });
 });
  
 nms.on('prePlay', (id, StreamPath, args) => {
