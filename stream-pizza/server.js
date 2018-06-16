@@ -134,11 +134,7 @@ io.on('connection', socket => {
     console.log(packet);
 
     if(!pkey) {
-      console.log(fs.readFileSync('./publickey.pem'));
-      console.log(Buffer.from(keyData));
-      
       pkey = ursa.createPublicKey(Buffer.from(keyData),'utf8');
-      //let pkey = ursaring.createPublicKey(fs.readFileSync('./publickey.pem'));
       console.log(`======PUBLIC KEY BY URSA========`);
       
       console.log(pkey);
