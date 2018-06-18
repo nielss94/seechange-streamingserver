@@ -25,7 +25,7 @@ function addUser(metadata) {
               console.log("Saved to db!");
           }).catch(err => {
               console.log(err);
-          });
+        });
 
     } catch (error) {
         console.log("ERROR: " + error)
@@ -43,11 +43,20 @@ function removeUser(metadata) {
             console.log('Removed from database');
         }).catch(err => {
             console.log(err);
-        });
+    });
 }
 
 async function getLive() {
    return await User.find();
 } 
 
-module.exports = { addUser, removeUser, getLive }
+function removeAllUsers() {
+    User.remove({})
+        .then(User => {
+            console.log('Removed all users from database');
+        }).catch(err => {
+            console.log(err);
+    });
+}
+
+module.exports = { addUser, removeUser, getLive, removeAllUsers }
