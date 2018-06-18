@@ -241,6 +241,16 @@ server.listen(6969, () => {
   console.log(`listening on port 3000`);
 });
 
+// Allow acces to angular:
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Acces-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    next();
+});
+
+
 app.listen(5555, () => {
   console.log('APP is listening on port 5555');
 });
