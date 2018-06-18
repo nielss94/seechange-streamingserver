@@ -6,6 +6,8 @@ const fs = require('fs');
 const path = require('path');
 const spawn = require('child-process-promise').spawn;
 const uuidV4 = require('uuid/v4');
+const sha256 = require('js-sha256');
+
 
 const config = {
   logType: 3,
@@ -103,9 +105,6 @@ nms.on('preConnect', (id, args) => {
 
   setInterval(() => {
     console.log('======COMPARE=====');    
-    console.log(rtmpPacketStore);
-    console.log(httpPacketStore);
-    
     if(httpPacketStore.length > 0 && rtmpPacketStore.length > 0){
       let foundOne = false;
       httpPacketStore.forEach((element, i) => {
@@ -113,26 +112,26 @@ nms.on('preConnect', (id, args) => {
         if(element.absoluteMadTime == rtmpPacketStore[0].timestamp) {
           console.log(`found one! ${element.absoluteMadTime} and ${rtmpPacketStore[0].timestamp}`);
           foundOne = true;
-
-          httpPacketStore.splice(0,i);
-          rtmpPacketStore.splice(0,1);
-
+          
           const match = {
             httpPacket: element,
             rtmpPacket: rtmpPacketStore[0]
           }
+          
+          httpPacketStore.splice(0,i);
+          rtmpPacketStore.splice(0,1);
 
+          console.log(match);
+          
           verifyIntegrity(match)
           .then((match) => {
-            console.log(`match verified`);
-            
+            console.log(`match VERIFIED`);
           })
           .catch((match) => {
-            nms.getSession(match.sessionId).reject();
+            console.log(`match DENIED ${match}`);
+            
+//            nms.getSession(match.sessionId).reject();
           });
-
-          console.log(rtmpPacketStore);
-          console.log(httpPacketStore);
         }
       });
       if(!foundOne)
@@ -143,6 +142,20 @@ nms.on('preConnect', (id, args) => {
 
 function verifyIntegrity (match) {
 
+  return new Promise((resolve, reject) => {
+    const rtmpPayloadHash = sha256.hmac('SUPERSECRETHASHTHING', Buffer.from(match.rtmpPacket.buffer,'hex'));
+
+    console.log('===========HASHESSS==============');
+    console.log(match.rtmpPacket.buffer);
+    console.log(rtmpPayloadHash);
+    console.log(match.httpPacket.hash);
+    
+    if(rtmpPayloadHash == match.httpPacket.hash){
+      resolve(match);
+    }else{
+      reject(match);
+    }
+  });
 }
 
 function compareHttp(a,b) {
@@ -161,27 +174,6 @@ function compareRtmp(a,b) {
   return 0;
 }
 
-/*
-async function matchTimestamp(timestamp) {
- let matchObj;
- await setTimeout(() => {
-   packetStore.forEach(element => {
-     if(element.absoluteMadTime === timestamp){
-       matchObj = {
-         packetStamp: element.absoluteMadTime,
-         rtmpStamp: timestamp
-       }
-     }
-   });
-   if(matchObj){
-     console.log(`${timestamp} MATCHED with a received packet`);
-     console.log(matchObj);
-   }else{
-     console.log(`${timestamp} DID NOT MATCH with a received packet`);
-   }
- },10)
-}
- */
 nms.on('postConnect', (id, args) => {
  console.log('[NodeEvent on postConnect]', `id=${id} args=${JSON.stringify(args)}`);
 });
