@@ -1,10 +1,11 @@
 const express = require('express');
 const routes = express.Router();
+const { getLive } = require('./database/db.meta');
 
-// Send data to firebase db:
-routes.post('/metadata????????', function(req, res) {
+// retrieve data from mongodb:
+routes.get('/live', async function(req, res) {
     res.contentType('application/json');
-
+    res.send(await getLive());
 });
 
-module.exports = { routes };
+module.exports = routes;

@@ -6,18 +6,24 @@ const fs = require('fs');
 const path = require('path');
 const spawn = require('child-process-promise').spawn;
 const uuidV4 = require('uuid/v4');
+const sha256 = require('js-sha256');
+const { addUser, removeUser } = require('./database/db.meta');
+const mongodb = require('./database/db.config');
+const routes = require('./routes.metadata');
+const express = require('express');
+const app = express();
 
 const config = {
   logType: 3,
   rtmp: {
-    port: 1935,
+    port: 1999,
     chunk_size: 10000,
     gop_cache: false,
     ping: 20,
     ping_timeout: 30
   },
   http: {
-    port: 8000,
+    port: 42069,
     mediaroot: './media',
     allow_origin: '*'
   }
@@ -26,7 +32,12 @@ const config = {
 var nms = new NodeMediaServer(config);
 nms.run();
 
-//processing video streams
+// routes:
+app.use('/api/', routes);
+
+
+
+// processing video streams
 let streamMediaPath;
 
 function processVideo(path) {
@@ -79,16 +90,16 @@ nms.on('preConnect', (id, args) => {
        let timestamp = element.header.timestamp;
        
        if(timestamp !== previousTimestamp && i === 6){
-         console.log(`==========SESSION HEADER INFO============`);
-         console.log(`${timestamp} on RTMP`);
-         console.log(session.parserPacket.payload);
+        //  console.log(`==========SESSION HEADER INFO============`);
+        //  console.log(`${timestamp} on RTMP`);
+        //  console.log(session.parserPacket.payload);
          
          previousTimestamp = timestamp;
         // matchTimestamp(timestamp);
        }
      });
    }catch(e) {
-     console.log(e);
+    //  console.log(e);
    }
  },10);
 });
@@ -168,41 +179,68 @@ io.on('connection', socket => {
 
   keyData = '';
   pkey = null;
+  metaData = null;
+
+  socket.on('certificate', cert => {
+    let decryptedCert = pkey.publicDecrypt(cert, 'hex', 'utf8');
+    console.log(`==========CERTIFICATE============`);
+    console.log(decryptedCert);
+    metaData = decryptedCert;
+  });
+
+  socket.on('certificateHash', cert => {
+    console.log(`==========CERTIFICATEHASH============`);
+    let decryptedCert = pkey.publicDecrypt(cert, 'hex' ,'utf8');
+    console.log(metaData);
+    let hashMeta = sha256.hmac('SUPERSECRETHASHTHING', metaData);
+    console.log(decryptedCert);
+    console.log('============================================');
+    console.log(hashMeta);
+    
+     if (hashMeta === decryptedCert) {
+       console.log("---------VERIFIED--------");
+       addUser(metaData);
+     } else {
+       console.log("---------UNVERIFIED--------");
+     }
+  });
 
   socket.on('packet', packet => {
-    console.log(`==========PACKET============`);
-    console.log(packet);
-
-    if(!pkey) {
-      pkey = ursa.createPublicKey(Buffer.from(keyData),'utf8');
-      console.log(`======PUBLIC KEY BY URSA========`);
-      
-      console.log(pkey);
-    } 
+    // console.log(`==========PACKET============`);
+    // console.log(packet);
     
     let decryptedData = pkey.publicDecrypt(packet, 'hex', 'utf8');
 
     const p = JSON.parse(decryptedData);
 
-    console.log(`======DECRYPTED DATA========`);
-    console.log(p);
+    // console.log(`======DECRYPTED DATA========`);
+    // console.log(p);
     //addPacket(p);
   });
 
-  socket.on('publickey', key => {
-    console.log(`==========PUBLIC KEY============`);
-    console.log(key);
+  socket.on('publickey', (key, callback) => {
     keyData = `-----BEGIN PUBLIC KEY-----\n${key}-----END PUBLIC KEY-----\n`;
-    console.log(keyData);
-   
+    if(!pkey) {
+      pkey = ursa.createPublicKey(Buffer.from(keyData),'utf8');
+    } 
+    callback(true);
   });
 
+  socket.on('stopStream', () => {
+    console.log('Stream is stopped');
+    removeUser(metaData);
+  })
 
   socket.on('disconnect', () => {
     console.log(`${socket.id} disconnected`);
+    removeUser(metaData);
   });
 });
 
-server.listen(3000, () => {
+server.listen(6969, () => {
   console.log(`listening on port 3000`);
+});
+
+app.listen(5555, () => {
+  console.log('APP is listening on port 5555');
 });
