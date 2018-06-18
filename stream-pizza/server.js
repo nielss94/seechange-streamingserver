@@ -7,7 +7,7 @@ const path = require('path');
 const spawn = require('child-process-promise').spawn;
 const uuidV4 = require('uuid/v4');
 const sha256 = require('js-sha256');
-const { addUser, removeUser, removeAllUsers } = require('./database/db.meta');
+const { addUser, removeUser, removeAllUsers, updateUser } = require('./database/db.meta');
 const mongodb = require('./database/db.config');
 const routes = require('./routes.metadata');
 const express = require('express');
@@ -235,12 +235,12 @@ io.on('connection', socket => {
 
   socket.on('stopStream', () => {
     console.log('Stream is stopped');
-    removeUser(metaData);
+    updateUser(metaData);
   })
 
   socket.on('disconnect', () => {
     console.log(`${socket.id} disconnected`);
-    removeUser(metaData);
+    updateUser(metaData);
   });
 });
 

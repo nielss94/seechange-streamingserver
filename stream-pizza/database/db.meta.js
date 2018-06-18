@@ -4,7 +4,8 @@ const UserSchema = new mongoose.Schema({
     name: String,
     avatar_source: String,
     short_bio: String,
-    stream_key: String
+    stream_key: String,
+    isLive: Boolean
 });
 
 const User = mongoose.model('user', UserSchema);
@@ -19,7 +20,8 @@ function addUser(metadata) {
             name: metaJSON.name,
             avatar_source: metaJSON.avatar_source,
             short_bio: metaJSON.short_bio,
-            stream_key: metaJSON.stream_key
+            stream_key: metaJSON.stream_key,
+            isLive: 1
         }).save()
           .then(newUser => {
               console.log("Saved to db!");
@@ -47,7 +49,7 @@ function removeUser(metadata) {
 }
 
 async function getLive() {
-   return await User.find();
+   return await User.find({ isLive: 1 });
 } 
 
 function removeAllUsers() {
@@ -59,4 +61,21 @@ function removeAllUsers() {
     });
 }
 
-module.exports = { addUser, removeUser, getLive, removeAllUsers }
+function updateUser(metadata) {
+    metaJSON = JSON.parse(metadata);
+    User.findOneAndUpdate({ stream_key: metaJSON.stream_key })
+        .then(user => {
+            console.log('User updating...');
+            user.metaJSON.isLive = 0;
+            user.save()
+                .then(user => {
+                    console.log('User is updated to NOT live...');
+                }).catch(err => {
+                    console.log(err);
+                });
+        }).catch(err => {
+            console.log(err);
+    });
+}
+
+module.exports = { addUser, removeUser, getLive, removeAllUsers, updateUser }
