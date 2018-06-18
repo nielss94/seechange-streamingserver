@@ -66,33 +66,102 @@ const mkdirSync = function (dirPath) {
 };
 
 let previousTimestamp;
-let packetStore = [];
+let httpPacketStore = [];
+let rtmpPacketStore = [];
 
 nms.on('preConnect', (id, args) => {
  console.log('[NodeEvent on preConnect]', `id=${id} args=${JSON.stringify(args)}`);
  
- setInterval(() => {
-   try{
-     let session = nms.getSession(id);
-     
-     session.inPackets.forEach((element, i) => {
-       let timestamp = element.header.timestamp;
-       
-       if(timestamp !== previousTimestamp && i === 6){
-         console.log(`==========SESSION HEADER INFO============`);
-         console.log(`${timestamp} on RTMP`);
-         console.log(session.parserPacket.payload);
-         
-         previousTimestamp = timestamp;
-        // matchTimestamp(timestamp);
-       }
-     });
-   }catch(e) {
-     console.log(e);
-   }
- },10);
+  setInterval(() => {
+    try{
+      let session = nms.getSession(id);
+    
+      session.inPackets.forEach((element, i) => {
+        let timestamp = element.header.timestamp;
+        
+        if(timestamp !== previousTimestamp && i === 6){
+          console.log(`==========SESSION HEADER INFO============`);
+          console.log(`${timestamp} on RTMP`);
+          console.log(session.parserPacket.payload);
+          
+          addRtmpPacket({
+            timestamp: timestamp,
+            buffer: session.parserPacket.payload,
+            sessionId: id
+          });
+
+          previousTimestamp = timestamp;
+
+          // matchTimestamp(timestamp);
+        
+        }
+      });
+    }catch(e) {
+      console.log(e);
+    }
+  },10);
+
+  setInterval(() => {
+    console.log('======COMPARE=====');    
+    console.log(rtmpPacketStore);
+    console.log(httpPacketStore);
+    
+    if(httpPacketStore.length > 0 && rtmpPacketStore.length > 0){
+      let foundOne = false;
+      httpPacketStore.forEach((element, i) => {
+
+        if(element.absoluteMadTime == rtmpPacketStore[0].timestamp) {
+          console.log(`found one! ${element.absoluteMadTime} and ${rtmpPacketStore[0].timestamp}`);
+          foundOne = true;
+
+          httpPacketStore.splice(0,i);
+          rtmpPacketStore.splice(0,1);
+
+          const match = {
+            httpPacket: element,
+            rtmpPacket: rtmpPacketStore[0]
+          }
+
+          verifyIntegrity(match)
+          .then((match) => {
+            console.log(`match verified`);
+            
+          })
+          .catch((match) => {
+            nms.getSession(match.sessionId).reject();
+          });
+
+          console.log(rtmpPacketStore);
+          console.log(httpPacketStore);
+        }
+      });
+      if(!foundOne)
+        rtmpPacketStore.splice(0,1);
+    }
+  },100);
 });
 
+function verifyIntegrity (match) {
+
+}
+
+function compareHttp(a,b) {
+  if (a.absoluteMadTime < b.absoluteMadTime)
+    return -1;
+  if (a.absoluteMadTime > b.absoluteMadTime)
+    return 1;
+  return 0;
+}
+
+function compareRtmp(a,b) {
+  if (a.timestamp < b.timestamp)
+    return -1;
+  if (a.timestamp > b.timestamp)
+    return 1;
+  return 0;
+}
+
+/*
 async function matchTimestamp(timestamp) {
  let matchObj;
  await setTimeout(() => {
@@ -112,7 +181,7 @@ async function matchTimestamp(timestamp) {
    }
  },10)
 }
- 
+ */
 nms.on('postConnect', (id, args) => {
  console.log('[NodeEvent on postConnect]', `id=${id} args=${JSON.stringify(args)}`);
 });
@@ -160,8 +229,14 @@ nms.on('donePlay', (id, StreamPath, args) => {
  console.log('[NodeEvent on donePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
 });
 
-function addPacket(packet) {
- packetStore.push(packet);
+function addRtmpPacket(packet) {
+  rtmpPacketStore.push(packet);
+  rtmpPacketStore.sort(compareRtmp);
+ }
+
+function addHttpPacket(packet) {
+  httpPacketStore.push(packet);
+  httpPacketStore.sort(compareHttp);
 }
 
 io.on('connection', socket => {  
@@ -186,15 +261,15 @@ io.on('connection', socket => {
 
     console.log(`======DECRYPTED DATA========`);
     console.log(p);
-    //addPacket(p);
+    addHttpPacket(p);
   });
 
   socket.on('publickey', key => {
     console.log(`==========PUBLIC KEY============`);
     console.log(key);
+    
     keyData = `-----BEGIN PUBLIC KEY-----\n${key}-----END PUBLIC KEY-----\n`;
     console.log(keyData);
-   
   });
 
 
