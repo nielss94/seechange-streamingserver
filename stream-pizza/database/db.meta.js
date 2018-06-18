@@ -5,14 +5,14 @@ const UserSchema = new mongoose.Schema({
     avatar_source: String,
     short_bio: String,
     stream_key: String,
-    isLive: Boolean
+    isLive: Boolean,
+    startTime: Date, 
+    endTime: Date
 });
 
 const User = mongoose.model('user', UserSchema);
 
 function addUser(metadata) {
-    console.log("SAVING USER IN DATABASE");
-
     try {
         metaJSON = JSON.parse(metadata);
         console.log(metaJSON);
@@ -21,21 +21,22 @@ function addUser(metadata) {
             avatar_source: metaJSON.avatar_source,
             short_bio: metaJSON.short_bio,
             stream_key: metaJSON.stream_key,
-            isLive: 1
+            isLive: 1,
+            startTime: Date.now(),
+            endTime: null
         }).save()
           .then(newUser => {
               console.log("Saved to db!");
           }).catch(err => {
               console.log(err);
         });
-
+        
     } catch (error) {
         console.log("ERROR: " + error)
     }
 }
 
 function removeUser(metadata) {
-
     console.log("REMOVING USER IN DATABASE");
     metaJSON = JSON.parse(metadata);
 
@@ -67,6 +68,7 @@ function updateUser(metadata) {
         .then(user => {
             console.log('User updating...');
             user.metaJSON.isLive = 0;
+            user.metaJSON.EndTime = Date.now();
             user.save()
                 .then(user => {
                     console.log('User is updated to NOT live...');
