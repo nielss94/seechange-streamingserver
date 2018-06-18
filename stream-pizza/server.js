@@ -104,8 +104,8 @@ nms.on('preConnect', (id, args) => {
   },10);
 
   setInterval(() => {
-    console.log('======COMPARE=====');    
     if(httpPacketStore.length > 0 && rtmpPacketStore.length > 0){
+      console.log('======COMPARE=====');    
       let foundOne = false;
       httpPacketStore.forEach((element, i) => {
 
@@ -128,8 +128,7 @@ nms.on('preConnect', (id, args) => {
             console.log(`match VERIFIED`);
           })
           .catch((match) => {
-            console.log(`match DENIED ${match}`);
-            
+            console.log(`match DENIED ${match}`);        
 //            nms.getSession(match.sessionId).reject();
           });
         }
@@ -141,16 +140,19 @@ nms.on('preConnect', (id, args) => {
 });
 
 function verifyIntegrity (match) {
-
   return new Promise((resolve, reject) => {
-    const rtmpPayloadHash = sha256.hmac('SUPERSECRETHASHTHING', Buffer.from(match.rtmpPacket.buffer,'hex'));
-
+    let buffertje = Buffer.from('This is a buffer example.');
+    console.log(buffertje);
+    console.log(buffertje.toString('utf8'));
+    const rtmpPayloadHash = sha256.hmac('SUPERSECRETHASHTHING', match.rtmpPacket.buffer.toString('utf8'));
+    const rtmpPayloadHash2 = sha256.hmac('SUPERSECRETHASHTHING', match.rtmpPacket.buffer.toString('hex'));
     console.log('===========HASHESSS==============');
     console.log(match.rtmpPacket.buffer);
     console.log(rtmpPayloadHash);
+    console.log(rtmpPayloadHash2);
     console.log(match.httpPacket.hash);
     
-    if(rtmpPayloadHash == match.httpPacket.hash){
+    if(rtmpPayloadHash === match.httpPacket.hash){
       resolve(match);
     }else{
       reject(match);
@@ -254,6 +256,11 @@ io.on('connection', socket => {
     console.log(`======DECRYPTED DATA========`);
     console.log(p);
     addHttpPacket(p);
+  });
+
+  socket.on('buffer', buff => {
+    console.log('==========BUFFER PLEASE=========');
+    console.log(buff);
   });
 
   socket.on('publickey', key => {
