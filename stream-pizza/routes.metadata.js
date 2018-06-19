@@ -8,4 +8,10 @@ routes.get('/live', async function(req, res) {
     res.send(await getLive());
 });
 
+// get information on one specific streamer
+routes.get('/getStreamer/:streamKey', function(req, res) {
+    res.contentType('application/json');
+    res.send(getUser(req.params.streamKey))
+});
+
 module.exports = routes;

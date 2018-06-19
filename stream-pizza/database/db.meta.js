@@ -59,6 +59,12 @@ async function setUserOffline(metadata) {
     }
 }
 
+function getUser(stream_key) {
+    User.findOne({ stream_key: stream_key })
+        .then((res) => { return res.status(200).json(res) })
+        .catch((error) => { return res.status(400).json(error) });
+}
+
 function logError(error) {
     console.log("ERROR: " + error)
 }
