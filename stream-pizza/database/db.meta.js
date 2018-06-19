@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model('user', UserSchema);
 
-function addUser(metadata) {
+async function addUser(metadata) {
     console.log("SAVING USER IN DATABASE");
 
     try {
@@ -22,60 +22,45 @@ function addUser(metadata) {
             short_bio: metaJSON.short_bio,
             stream_key: metaJSON.stream_key,
             isLive: 1
-        }).save()
-          .then(newUser => {
-              console.log("Saved to db!");
-          }).catch(err => {
-              console.log(err);
         });
 
-    } catch (error) {
-        console.log("ERROR: " + error)
+        await newUser.save();
+        console.log("Saved to db!");
+
+    } catch (e) {
+        logError(e);
     }
 }
 
-function removeUser(metadata) {
-
-    console.log("REMOVING USER IN DATABASE");
-    metaJSON = JSON.parse(metadata);
-
-    User.findOne({ stream_key: metaJSON.stream_key })
-        .remove()
-        .then(User => {
-            console.log('Removed from database');
-        }).catch(err => {
-            console.log(err);
-    });
-}
 
 async function getLive() {
    return await User.find({ isLive: 1 });
 } 
 
-function removeAllUsers() {
-    User.remove({})
-        .then(User => {
-            console.log('Removed all users from database');
-        }).catch(err => {
-            console.log(err);
-    });
+async function setAllUsersOffline() {
+    try {
+        await User.update({isLive: 0});
+        console.log('Removed all users from database');
+    } catch (e) {
+        logError(e);
+    }
 }
 
-function updateUser(metadata) {
-    metaJSON = JSON.parse(metadata);
-    User.findOneAndUpdate({ stream_key: metaJSON.stream_key })
-        .then(user => {
-            console.log('User updating...');
-            user.metaJSON.isLive = 0;
-            user.save()
-                .then(user => {
-                    console.log('User is updated to NOT live...');
-                }).catch(err => {
-                    console.log(err);
-                });
-        }).catch(err => {
-            console.log(err);
-    });
+async function setUserOffline(metadata) {
+    try {
+        metaJSON = JSON.parse(metadata);
+        user = await User.findOneAndUpdate({ stream_key: metaJSON.stream_key });
+        console.log('User updating...');
+        user.isLive = 0;
+        await user.save()
+        console.log('User not live')
+    } catch (e) {
+        logError(e);
+    }
 }
 
-module.exports = { addUser, removeUser, getLive, removeAllUsers, updateUser }
+function logError(error) {
+    console.log("ERROR: " + error)
+}
+
+module.exports = { addUser, setUserOffline: setUserOffline, getLive, setAllUsersOffline, setUserOffline: setUserOffline }
