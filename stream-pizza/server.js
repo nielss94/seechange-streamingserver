@@ -69,9 +69,9 @@ function processVideo(path) {
     ffmpeg.then(function () {
         console.log('[spawn] done!');
     })
-        .catch(function (err) {
-            console.error('[spawn] ERROR: ', err);
-        });
+    .catch(function (err) {
+        console.error('[spawn] ERROR: ', err);
+    });
 }
 
 //create directories
@@ -196,7 +196,6 @@ nms.on('postPublish', (id, StreamPath, args) => {
     streamMediaPath = config.http.mediaroot + StreamPath;
     mkdirSync(path.resolve(streamMediaPath));
     processVideo(StreamPath);
-
 });
 
 nms.on('donePublish', (id, StreamPath, args) => {
@@ -229,6 +228,7 @@ function addRtmpPacket(packet) {
 function addHttpPacket(packet) {
   httpPacketStore.push(packet);
   httpPacketStore.sort(compareHttp);
+}
 
 io.on('connection', socket => {
 
@@ -277,26 +277,26 @@ io.on('connection', socket => {
     
             addHttpPacket(p);
         }
-  });
+    });
 
-  socket.on('publickey', (key, callback) => {
-      console.log(`==========PUBLIC KEY============`);
-      keyData = `-----BEGIN PUBLIC KEY-----\n${key}-----END PUBLIC KEY-----\n`;
-      if (!pkey) {
-          pkey = ursa.createPublicKey(Buffer.from(keyData), 'utf8');
-      }
-      callback(true);
-  });
+    socket.on('publickey', (key, callback) => {
+        console.log(`==========PUBLIC KEY============`);
+        keyData = `-----BEGIN PUBLIC KEY-----\n${key}-----END PUBLIC KEY-----\n`;
+        if (!pkey) {
+            pkey = ursa.createPublicKey(Buffer.from(keyData), 'utf8');
+        }
+        callback(true);
+    });
 
-  socket.on('stopStream', () => {
-      console.log('Stream is stopped');
-      setUserOffline(metaData);
-  });
+    socket.on('stopStream', () => {
+        console.log('Stream is stopped');
+        setUserOffline(metaData);
+    });
 
-  socket.on('disconnect', () => {
-      console.log(`${socket.id} disconnected`);
-      setUserOffline(metaData);
-  });
+    socket.on('disconnect', () => {
+        console.log(`${socket.id} disconnected`);
+        setUserOffline(metaData);
+    });
 });
 
 server.listen(3000, () => {
