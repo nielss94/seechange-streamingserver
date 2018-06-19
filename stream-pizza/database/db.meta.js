@@ -67,14 +67,16 @@ async function setUserOffline(metadata) {
     }
 }
 
-function getUser(stream_key) {
-    User.findOne({ stream_key: stream_key })
-        .then((res) => { return res.status(200).json(res) })
-        .catch((error) => { return res.status(400).json(error) });
+async function getUser(stream_key) {
+    try {
+        return await User.findOne({ stream_key: stream_key });
+    } catch (e) {
+        logError(e);
+    }
 }
 
 function logError(error) {
     console.log("ERROR: " + error)
 }
 
-module.exports = { addUser, setUserOffline: setUserOffline, getLive, setAllUsersOffline, setUserOffline: setUserOffline }
+module.exports = { addUser, getUser, getLive, setAllUsersOffline, setUserOffline };
