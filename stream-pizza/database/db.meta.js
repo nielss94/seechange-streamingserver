@@ -16,16 +16,24 @@ async function addUser(metadata) {
     try {
         metaJSON = JSON.parse(metadata);
         console.log(metaJSON);
-        const newUser = new User({
-            name: metaJSON.name,
-            avatar_source: metaJSON.avatar_source,
-            short_bio: metaJSON.short_bio,
-            stream_key: metaJSON.stream_key,
-            isLive: 1
-        });
+        const user = await User.findOne({stream_key: metaJSON.stream_key});
+        if (user) {
+            user.isLive = 1;
+            await user.save();
+            console.log("User now live again!");
+        } else {
+            const newUser = new User({
+                name: metaJSON.name,
+                avatar_source: metaJSON.avatar_source,
+                short_bio: metaJSON.short_bio,
+                stream_key: metaJSON.stream_key,
+                isLive: 1
+            });
 
-        await newUser.save();
-        console.log("Saved to db!");
+            await newUser.save();
+            console.log("Saved to db!");
+        }
+
 
     } catch (e) {
         logError(e);
@@ -39,8 +47,8 @@ async function getLive() {
 
 async function setAllUsersOffline() {
     try {
-        await User.update({isLive: 0});
-        console.log('Removed all users from database');
+        users = await User.update({}, { isLive: 0 });
+        console.log('Updated all');
     } catch (e) {
         logError(e);
     }
@@ -52,8 +60,8 @@ async function setUserOffline(metadata) {
         user = await User.findOneAndUpdate({ stream_key: metaJSON.stream_key });
         console.log('User updating...');
         user.isLive = 0;
-        await user.save()
-        console.log('User not live')
+        await user.save();
+        console.log('User not live');
     } catch (e) {
         logError(e);
     }
