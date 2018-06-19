@@ -16,14 +16,14 @@ const app = express();
 const config = {
     logType: 3,
     rtmp: {
-        port: 1999,
+        port: 1935,
         chunk_size: 10000,
         gop_cache: false,
         ping: 20,
         ping_timeout: 30
     },
     http: {
-        port: 42069,
+        port: 8000,
         mediaroot: './media',
         allow_origin: '*'
     }
@@ -84,51 +84,98 @@ const mkdirSync = function (dirPath) {
 };
 
 let previousTimestamp;
-let packetStore = [];
+let httpPacketStore = [];
+let rtmpPacketStore = [];
 
 nms.on('preConnect', (id, args) => {
-    console.log('[NodeEvent on preConnect]', `id=${id} args=${JSON.stringify(args)}`);
+ console.log('[NodeEvent on preConnect]', `id=${id} args=${JSON.stringify(args)}`);
+ 
+  setInterval(() => {
+    try{
+      let session = nms.getSession(id);
+    
+      session.inPackets.forEach((element, i) => {
+        let timestamp = element.header.timestamp;
+        
+        if(timestamp !== previousTimestamp && i === 6){
+          console.log(`==========SESSION HEADER INFO============`);
+          console.log(`${timestamp} on RTMP`);
+          console.log(session.parserPacket.payload);
+          
+          addRtmpPacket({
+            timestamp: timestamp,
+            buffer: session.parserPacket.payload,
+            sessionId: id
+          });
 
-    setInterval(() => {
-        try {
-            let session = nms.getSession(id);
-
-            session.inPackets.forEach((element, i) => {
-                let timestamp = element.header.timestamp;
-
-                if (timestamp !== previousTimestamp && i === 6) {
-                    //  console.log(`==========SESSION HEADER INFO============`);
-                    //  console.log(`${timestamp} on RTMP`);
-                    //  console.log(session.parserPacket.payload);
-
-                    previousTimestamp = timestamp;
-                    // matchTimestamp(timestamp);
-                }
-            });
-        } catch (e) {
-            //  console.log(e);
+          previousTimestamp = timestamp;
         }
-    }, 10);
+      });
+    }catch(e) {
+      console.log(e);
+    }
+  },10);
+
+  setInterval(() => {
+    if(httpPacketStore.length > 0 && rtmpPacketStore.length > 0){
+      console.log('======COMPARE=====');    
+      let foundOne = false;
+      httpPacketStore.forEach((element, i) => {
+
+        if(element.absoluteMadTime == rtmpPacketStore[0].timestamp) {
+          console.log(`found one! ${element.absoluteMadTime} and ${rtmpPacketStore[0].timestamp}`);
+          foundOne = true;
+          
+          const match = {
+            httpPacket: element,
+            rtmpPacket: rtmpPacketStore[0]
+          }
+          
+          httpPacketStore.splice(0,i);
+          rtmpPacketStore.splice(0,1);
+          
+          verifyIntegrity(match)
+          .then((match) => {
+            console.log(`match VERIFIED`);
+          })
+          .catch((match) => {
+            console.log(`match DENIED`);        
+            //nms.getSession(match.sessionId).reject();
+          });
+        }
+      });
+      if(!foundOne)
+        rtmpPacketStore.splice(0,1);
+    }
+  },100);
 });
 
-async function matchTimestamp(timestamp) {
-    let matchObj;
-    await setTimeout(() => {
-        packetStore.forEach(element => {
-            if (element.absoluteMadTime === timestamp) {
-                matchObj = {
-                    packetStamp: element.absoluteMadTime,
-                    rtmpStamp: timestamp
-                }
-            }
-        });
-        if (matchObj) {
-            console.log(`${timestamp} MATCHED with a received packet`);
-            console.log(matchObj);
-        } else {
-            console.log(`${timestamp} DID NOT MATCH with a received packet`);
-        }
-    }, 10)
+function verifyIntegrity (match) {
+  return new Promise((resolve, reject) => {
+    const rtmpPayloadHash = sha256.hmac('SUPERSECRETHASHTHING', match.rtmpPacket.buffer);
+
+    if(rtmpPayloadHash === match.httpPacket.hash){
+      resolve(match);
+    }else{
+      reject(match);
+    }
+  });
+}
+
+function compareHttp(a,b) {
+  if (a.absoluteMadTime < b.absoluteMadTime)
+    return -1;
+  if (a.absoluteMadTime > b.absoluteMadTime)
+    return 1;
+  return 0;
+}
+
+function compareRtmp(a,b) {
+  if (a.timestamp < b.timestamp)
+    return -1;
+  if (a.timestamp > b.timestamp)
+    return 1;
+  return 0;
 }
 
 nms.on('postConnect', (id, args) => {
@@ -140,9 +187,7 @@ nms.on('doneConnect', (id, args) => {
 });
 
 nms.on('prePublish', (id, StreamPath, args) => {
-    console.log('[NodeEvent on prePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
-    // let session = nms.getSession(id);
-    // session.reject();
+ console.log('[NodeEvent on prePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
 });
 
 nms.on('postPublish', (id, StreamPath, args) => {
@@ -165,9 +210,7 @@ nms.on('donePublish', (id, StreamPath, args) => {
 });
 
 nms.on('prePlay', (id, StreamPath, args) => {
-    console.log('[NodeEvent on prePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
-    // let session = nms.getSession(id);
-    // session.reject();
+ console.log('[NodeEvent on prePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
 });
 
 nms.on('postPlay', (id, StreamPath, args) => {
@@ -178,9 +221,14 @@ nms.on('donePlay', (id, StreamPath, args) => {
     console.log('[NodeEvent on donePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
 });
 
-function addPacket(packet) {
-    packetStore.push(packet);
-}
+function addRtmpPacket(packet) {
+  rtmpPacketStore.push(packet);
+  rtmpPacketStore.sort(compareRtmp);
+ }
+
+function addHttpPacket(packet) {
+  httpPacketStore.push(packet);
+  httpPacketStore.sort(compareHttp);
 
 io.on('connection', socket => {
 
@@ -189,63 +237,69 @@ io.on('connection', socket => {
     metaData = null;
 
     socket.on('certificate', cert => {
-        let decryptedCert = pkey.publicDecrypt(cert, 'hex', 'utf8');
-        console.log(`==========CERTIFICATE============`);
-        console.log(decryptedCert);
-        metaData = decryptedCert;
+        if(pkey) {
+          let decryptedCert = pkey.publicDecrypt(cert, 'hex', 'utf8');
+          console.log(`==========CERTIFICATE============`);
+          console.log(decryptedCert);
+          metaData = decryptedCert;
+        }
     });
-
+ 
     socket.on('certificateHash', cert => {
         console.log(`==========CERTIFICATEHASH============`);
-        let decryptedCert = pkey.publicDecrypt(cert, 'hex', 'utf8');
-        console.log(metaData);
-        let hashMeta = sha256.hmac('SUPERSECRETHASHTHING', metaData);
-        console.log(decryptedCert);
-        console.log('============================================');
-        console.log(hashMeta);
+        if(pkey)
+        {
+          let decryptedCert = pkey.publicDecrypt(cert, 'hex', 'utf8');
+          console.log(metaData);
+          let hashMeta = sha256.hmac('SUPERSECRETHASHTHING', metaData);
+          console.log(decryptedCert);
+          console.log('============================================');
+          console.log(hashMeta);
 
-        if (hashMeta === decryptedCert) {
-            console.log("---------VERIFIED--------");
-            addUser(metaData);
-        } else {
-            console.log("---------UNVERIFIED--------");
+          if (hashMeta === decryptedCert) {
+              console.log("---------VERIFIED--------");
+              addUser(metaData);
+          } else {
+              console.log("---------UNVERIFIED--------");
+          }
         }
     });
 
     socket.on('packet', packet => {
-        // console.log(`==========PACKET============`);
-        // console.log(packet);
+        console.log(`==========PACKET============`);
+        console.log(packet);
         if (pkey) {
             let decryptedData = pkey.publicDecrypt(packet, 'hex', 'utf8');
             const p = JSON.parse(decryptedData);
+             
+            console.log(`======DECRYPTED DATA========`);
+            console.log(p);
+    
+            addHttpPacket(p);
         }
+  });
 
+  socket.on('publickey', (key, callback) => {
+      console.log(`==========PUBLIC KEY============`);
+      keyData = `-----BEGIN PUBLIC KEY-----\n${key}-----END PUBLIC KEY-----\n`;
+      if (!pkey) {
+          pkey = ursa.createPublicKey(Buffer.from(keyData), 'utf8');
+      }
+      callback(true);
+  });
 
-        // console.log(`======DECRYPTED DATA========`);
-        // console.log(p);
-        //addPacket(p);
-    });
+  socket.on('stopStream', () => {
+      console.log('Stream is stopped');
+      setUserOffline(metaData);
+  });
 
-    socket.on('publickey', (key, callback) => {
-        keyData = `-----BEGIN PUBLIC KEY-----\n${key}-----END PUBLIC KEY-----\n`;
-        if (!pkey) {
-            pkey = ursa.createPublicKey(Buffer.from(keyData), 'utf8');
-        }
-        callback(true);
-    });
-
-    socket.on('stopStream', () => {
-        console.log('Stream is stopped');
-        setUserOffline(metaData);
-    });
-
-    socket.on('disconnect', () => {
-        console.log(`${socket.id} disconnected`);
-        setUserOffline(metaData);
-    });
+  socket.on('disconnect', () => {
+      console.log(`${socket.id} disconnected`);
+      setUserOffline(metaData);
+  });
 });
 
-server.listen(6969, () => {
+server.listen(3000, () => {
     console.log(`listening on port 3000`);
 });
 
