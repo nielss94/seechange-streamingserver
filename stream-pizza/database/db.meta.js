@@ -5,7 +5,9 @@ const UserSchema = new mongoose.Schema({
     avatar_source: String,
     short_bio: String,
     stream_key: String,
-    isLive: Boolean
+    isLive: Boolean,
+    startTime: Date,
+    satoshi: Number
 });
 
 const User = mongoose.model('user', UserSchema);
@@ -34,12 +36,10 @@ async function addUser(metadata) {
             console.log("Saved to db!");
         }
 
-
     } catch (e) {
         logError(e);
     }
 }
-
 
 async function getLive() {
    return await User.find({ isLive: 1 });

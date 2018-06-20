@@ -8,8 +8,10 @@ const spawn = require('child-process-promise').spawn;
 const uuidV4 = require('uuid/v4');
 const sha256 = require('js-sha256');
 const {addUser, setAllUsersOffline, setUserOffline} = require('./database/db.meta');
+const {onlineLog, offlineLog} = require('./database/db.db.log');
 const mongodb = require('./database/db.config');
 const routes = require('./routes.metadata');
+const satoshi_routes = require('./routes.satoshi');
 const express = require('express');
 const app = express();
 
@@ -43,6 +45,7 @@ app.use(function (req, res, next) {
 });
 
 app.use('/api/', routes);
+app.use('/api/', satoshi_routes);
 
 // processing video streams
 let streamMediaPath;
@@ -259,6 +262,7 @@ io.on('connection', socket => {
           if (hashMeta === decryptedCert) {
               console.log("---------VERIFIED--------");
               addUser(metaData);
+              onlineLog(metaData);
           } else {
               console.log("---------UNVERIFIED--------");
           }
@@ -291,11 +295,13 @@ io.on('connection', socket => {
     socket.on('stopStream', () => {
         console.log('Stream is stopped');
         setUserOffline(metaData);
+        offlineLog(metaData);
     });
 
     socket.on('disconnect', () => {
         console.log(`${socket.id} disconnected`);
         setUserOffline(metaData);
+        offlineLog(metaData);
     });
 });
 
