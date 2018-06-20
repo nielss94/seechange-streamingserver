@@ -13,12 +13,10 @@ const UserSchema = new mongoose.Schema({
 const User = mongoose.model('user', UserSchema);
 
 async function addUser(metadata) {
-    console.log("SAVING USER IN DATABASE");
-
-    try {
+   try {
         metaJSON = JSON.parse(metadata);
         console.log(metaJSON);
-        const user = await User.findOne({stream_key: metaJSON.stream_key});
+        const user = await User.findOne({ stream_key: metaJSON.stream_key });
         if (user) {
             user.isLive = 1;
             await user.save();

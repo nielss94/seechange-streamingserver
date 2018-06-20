@@ -31,10 +31,9 @@ const config = {
     }
 };
 
-var nms = new NodeMediaServer(config);
+let nms = new NodeMediaServer(config);
 nms.run();
 
-// routes:
 // Allow acces to angular:
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -47,7 +46,7 @@ app.use(function (req, res, next) {
 app.use('/api/', routes);
 app.use('/api/', satoshi_routes);
 
-// processing video streams
+// Processing video streams:
 let streamMediaPath;
 
 function processVideo(path) {
@@ -77,7 +76,7 @@ function processVideo(path) {
     });
 }
 
-//create directories
+// Create directories:
 const mkdirSync = function (dirPath) {
     try {
         fs.mkdirSync(dirPath)

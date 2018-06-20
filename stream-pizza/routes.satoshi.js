@@ -1,8 +1,8 @@
 const express = require('express');
 const routes = express.Router();
-const Satoshi = require('../models/satoshi.model');
+const Satoshi = require('./database/db.satoshi');
 
-// get satoshi 
+// Get satoshi: 
 routes.get('/satoshi/:streamKey', function(req, res) {
    res.contentType('application/json');
 
@@ -13,7 +13,7 @@ routes.get('/satoshi/:streamKey', function(req, res) {
        .catch((error) => res.status(400).json(error));
 });
 
-// create new satoshi
+// Create new satoshi:
 routes.post('/satoshi', function(req, res) {
    let satoshi = new Satoshi({ 'streamKey' : req.body.streamKey, 'timestamp' : Date.now(), 'amount' : req.body.amount });
 
@@ -28,7 +28,7 @@ routes.post('/satoshi', function(req, res) {
        })
 });
 
-// update satoshi
+// Update satoshi:
 routes.put('/satoshi/:streamKey', function(req, res) {
    let streamKey = req.params.streamKey;
    let updatedSatoshi = req.body;

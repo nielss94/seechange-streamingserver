@@ -6,7 +6,6 @@ const LogSchema = new mongoose.Schema({
     endTime: Date
 });
 
-
 const Log = mongoose.model('log', LogSchema);
 
 async function onlineLog(metaData) {
@@ -21,7 +20,7 @@ async function onlineLog(metaData) {
     } catch (e) {
         logError(e);
     }  
-};
+}
 
 async function offlineLog(metaData) {
     try {
