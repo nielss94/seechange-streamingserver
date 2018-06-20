@@ -92,25 +92,26 @@ nms.on('preConnect', (id, args) => {
  
   setInterval(() => {
     try{
-      let session = nms.getSession(id);
+        let session = nms.getSession(id);
+        if(session){
+            session.inPackets.forEach((element, i) => {
+                let timestamp = element.header.timestamp;
+                
+                if(timestamp !== previousTimestamp && i === 6){
+                console.log(`==========SESSION HEADER INFO============`);
+                console.log(`${timestamp} on RTMP`);
+                console.log(session.parserPacket.payload);
+                
+                addRtmpPacket({
+                    timestamp: timestamp,
+                    buffer: session.parserPacket.payload,
+                    sessionId: id
+                });
     
-      session.inPackets.forEach((element, i) => {
-        let timestamp = element.header.timestamp;
-        
-        if(timestamp !== previousTimestamp && i === 6){
-          console.log(`==========SESSION HEADER INFO============`);
-          console.log(`${timestamp} on RTMP`);
-          console.log(session.parserPacket.payload);
-          
-          addRtmpPacket({
-            timestamp: timestamp,
-            buffer: session.parserPacket.payload,
-            sessionId: id
-          });
-
-          previousTimestamp = timestamp;
+                previousTimestamp = timestamp;
+                }
+            });
         }
-      });
     }catch(e) {
       console.log(e);
     }
