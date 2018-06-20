@@ -280,10 +280,6 @@ io.on('connection', socket => {
     socket.on('certificateHash', cert => {
         console.log(`==========CERTIFICATEHASH============`);
         if (pkey) {
-            console.log(metaData);
-            console.log(pkey);
-            console.log(keyData);
-            
             let decryptedCert = pkey.publicDecrypt(cert, 'hex', 'utf8');
             let hashMeta = sha256.hmac('SUPERSECRETHASHTHING', metaData);
             console.log(decryptedCert);
@@ -343,23 +339,6 @@ io.on('connection', socket => {
             });
         }
     });
-    /*
-    socket.on('disconnect', () => {
-        console.log(`${socket.id} disconnected`);
-        let found = false;
-        streamers.forEach(element => {
-            if(!found){
-                if(element !== null){
-                    if(element.streamPath === JSON.parse(metaData).stream_key){
-                        console.log(`deleting ${element.sessionid}`);
-                        setUserOffline(element.streamPath);
-                        element = null;
-                        found = true;
-                    }
-                }
-            }
-        });
-    });*/
 });
 
 server.listen(3000, () => {
