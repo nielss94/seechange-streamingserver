@@ -47,19 +47,23 @@ async function getLive() {
 
 async function setAllUsersOffline() {
     try {
-        users = await User.update({}, { isLive: 0 });
+        users = await User.update({}, { isLive: 0 }, {multi: true});
         console.log('Updated all');
     } catch (e) {
         logError(e);
     }
 }
 
-async function setUserOffline(metadata) {
+async function setUserOffline(stream_key) {
     try {
-        metaJSON = JSON.parse(metadata);
-        user = await User.findOneAndUpdate({ stream_key: metaJSON.stream_key });
+        user = await User.findOne({ stream_key: stream_key });
+        console.log('=======UPDATING THIS BOIII=====');
+        
+        console.log(user);
+        
         console.log('User updating...');
         user.isLive = 0;
+        console.log(user);
         await user.save();
         console.log('User not live');
     } catch (e) {
