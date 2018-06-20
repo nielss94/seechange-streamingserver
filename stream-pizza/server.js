@@ -150,11 +150,79 @@ nms.on('preConnect', (id, args) => {
                         });
                 }
             });
-            if (!foundOne)
+            if (!foundOne){
                 rtmpPacketStore.splice(0, 1);
+                console.log('No matches were found!');
+            }
         }
     }, 100);
 });
+
+nms.on('postConnect', (id, args) => {
+    console.log('[NodeEvent on postConnect]', `id=${id} args=${JSON.stringify(args)}`);
+});
+
+nms.on('doneConnect', (id, args) => {
+    console.log('[NodeEvent on doneConnect]', `id=${id} args=${JSON.stringify(args)}`);
+});
+
+nms.on('prePublish', (id, StreamPath, args) => {
+    console.log('[NodeEvent on prePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+});
+
+nms.on('postPublish', (id, StreamPath, args) => {
+    console.log('[NodeEvent on postPublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+    streamMediaPath = config.http.mediaroot + StreamPath;
+    mkdirSync(path.resolve(streamMediaPath));
+    let found = false;
+    streamers.forEach(element => {
+        if(!found){
+            if(element !== null){
+                if(element.sessionid === id){
+                    element.streamPath = StreamPath.toString().substring(6);
+                    found = true;
+                }
+            }
+        }
+    });
+    processVideo(StreamPath);
+});
+
+nms.on('donePublish', (id, StreamPath, args) => {
+    console.log('[NodeEvent on donePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+
+    //archive folder
+    fs.rename(streamMediaPath, streamMediaPath + '-' + uuidV4(), function (err) {
+        if (err) throw err;
+        console.log('renamed complete');
+    });
+    let found = false;
+    streamers.forEach(element => {
+        if(!found){
+            if(element !== null){
+                if(element.sessionid === id){
+                    console.log(`deleting ${element.sessionid}`);
+                    setUserOffline(element.streamPath);
+                    element = null;
+                    found = true;
+                }
+            }
+        }
+    });
+});
+
+nms.on('prePlay', (id, StreamPath, args) => {
+    console.log('[NodeEvent on prePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+});
+
+nms.on('postPlay', (id, StreamPath, args) => {
+    console.log('[NodeEvent on postPlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+});
+
+nms.on('donePlay', (id, StreamPath, args) => {
+    console.log('[NodeEvent on donePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+});
+
 
 function verifyIntegrity(match) {
     return new Promise((resolve, reject) => {
@@ -183,63 +251,6 @@ function compareRtmp(a, b) {
         return 1;
     return 0;
 }
-
-nms.on('postConnect', (id, args) => {
-    console.log('[NodeEvent on postConnect]', `id=${id} args=${JSON.stringify(args)}`);
-});
-
-nms.on('doneConnect', (id, args) => {
-    console.log('[NodeEvent on doneConnect]', `id=${id} args=${JSON.stringify(args)}`);
-});
-
-nms.on('prePublish', (id, StreamPath, args) => {
-    console.log('[NodeEvent on prePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
-});
-
-nms.on('postPublish', (id, StreamPath, args) => {
-    console.log('[NodeEvent on postPublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
-    streamMediaPath = config.http.mediaroot + StreamPath;
-    mkdirSync(path.resolve(streamMediaPath));
-    streamers.forEach(element => {
-        if(element !== null){
-            if(element.sessionid === id){
-                element.streamPath = StreamPath.toString().substring(6);
-            }
-        }
-    });
-    processVideo(StreamPath);
-});
-
-nms.on('donePublish', (id, StreamPath, args) => {
-    console.log('[NodeEvent on donePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
-
-    //archive folder
-    fs.rename(streamMediaPath, streamMediaPath + '-' + uuidV4(), function (err) {
-        if (err) throw err;
-        console.log('renamed complete');
-    });
-    streamers.forEach(element => {
-        if(element !== null){
-            if(element.sessionid === id){
-                console.log(`deleting ${element.sessionid}`);
-                setUserOffline(element.streamPath);
-                element = null;
-            }
-        }
-    });
-});
-
-nms.on('prePlay', (id, StreamPath, args) => {
-    console.log('[NodeEvent on prePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
-});
-
-nms.on('postPlay', (id, StreamPath, args) => {
-    console.log('[NodeEvent on postPlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
-});
-
-nms.on('donePlay', (id, StreamPath, args) => {
-    console.log('[NodeEvent on donePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
-});
 
 function addRtmpPacket(packet) {
     rtmpPacketStore.push(packet);
@@ -313,17 +324,41 @@ io.on('connection', socket => {
         }
         callback(true);
     });
-/*
+
     socket.on('stopStream', () => {
         console.log('Stream is stopped');
-        console.log(metaData);
-        
-        setUserOffline(metaData);
+        let found = false;
+        if(metaData !== null){
+            streamers.forEach(element => {
+                if(!found){
+                    if(element !== null){
+                        if(element.streamPath === JSON.parse(metaData).stream_key){
+                            console.log(`deleting ${element.sessionid}`);
+                            setUserOffline(element.streamPath);
+                            element = null;
+                            found = true;
+                        }
+                    }
+                }
+            });
+        }
     });
-
+    /*
     socket.on('disconnect', () => {
         console.log(`${socket.id} disconnected`);
-        setUserOffline(metaData);
+        let found = false;
+        streamers.forEach(element => {
+            if(!found){
+                if(element !== null){
+                    if(element.streamPath === JSON.parse(metaData).stream_key){
+                        console.log(`deleting ${element.sessionid}`);
+                        setUserOffline(element.streamPath);
+                        element = null;
+                        found = true;
+                    }
+                }
+            }
+        });
     });*/
 });
 
