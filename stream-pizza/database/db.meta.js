@@ -65,6 +65,14 @@ async function setUserOffline(metadata) {
     }
 }
 
+async function setSatoshi(metadata) {
+    try {
+        
+    } catch (e) {
+        logError(e);
+    }
+}
+
 async function getUser(stream_key) {
     try {
         return await User.findOne({ stream_key: stream_key });

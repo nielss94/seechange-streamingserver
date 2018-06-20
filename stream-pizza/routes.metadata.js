@@ -16,4 +16,11 @@ routes.get('/streamers/:stream_key', async function(req, res) {
     res.send(await getUser(stream_key));
 });
 
+// set amount of satoshi:
+routes.put('/satoshi/:stream_key', async function(req, res) {
+    stream_key = req.param.stream_key;
+
+    
+});
+
 module.exports = routes;
