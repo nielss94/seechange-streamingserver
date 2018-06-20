@@ -9,8 +9,8 @@ routes.get('/live', async function(req, res) {
 });
 
 // get information on one specific streamer
-routes.get('/streamers/:streamKey', async function(req, res) {
-    stream_key = req.params.streamKey;
+routes.get('/streamers/:stream_key', async function(req, res) {
+    stream_key = req.params.stream_key;
 
     res.contentType('application/json');
     res.send(await getUser(stream_key));

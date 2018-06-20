@@ -1,8 +1,7 @@
 const mongoose =  require('mongoose');
-const Schema = mongoose.Schema();
 const userData = require('./db.meta');
 
-const SatoshiSchema = new Schema({
+const SatoshiSchema = new mongoose.Schema({
     stream_key: String,
     timeStamp: Date,
     amount: Number
@@ -15,7 +14,7 @@ SatoshiSchema.post('save', function(next) {
    userData.findOne({ 'stream_key' : satoshi.stream_key })
        .then((userdata) => {
            userdata.satoshi += satoshi.amount;
-           userData.findOneAndUpdate({ 'streamKey': satoshi.stream_key }, userdata)
+           userData.findOneAndUpdate({ 'stream_key': satoshi.stream_key }, userdata)
                .then((userdata) => {
                    console.log(userdata);
                }).catch((error) => {
