@@ -59,9 +59,7 @@ async function setUserOffline(stream_key) {
     try {
         user = await User.findOne({ stream_key: stream_key });
         console.log('=======UPDATING THIS BOIII=====');
-
         console.log(user);
-
         console.log('User updating...');
         user.isLive = 0;
         console.log(user);
