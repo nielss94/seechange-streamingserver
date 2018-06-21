@@ -63,6 +63,7 @@ function processVideo(path) {
         '-sws_flags', 'bilinear',
         '-hls_list_size', '6',
         '-hls_time', '2', '/var/www/stream-pizza/media/' + path + '/index.m3u8'
+        '-threads', '2'
     ];
 
     let ffmpeg = spawn('ffmpeg', args);
